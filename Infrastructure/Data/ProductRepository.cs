@@ -16,14 +16,39 @@ namespace Infrastructure.Data
             _context = context;
 
         }
-        public async  Task<Product> GetProductByIdAsync(int id)
-        {
-           return await _context.Products.FindAsync(id);
-        }
+
 
         public async Task<IReadOnlyList<Product>> GetProductsAsync()
         {
-            return await _context.Products.ToListAsync();
+            return await _context.Products
+            .Include(p => p.ProductType)
+            .Include(p => p.ProductBrand)
+            .ToListAsync();
+        }
+         public async  Task<Product> GetProductByIdAsync(int id)
+        {
+          // return await _context.Products.FindAsync(id);
+          // find not working with iquariable or chaining query
+          //can use single or default - default value is sequence is empty
+          //throw exception if more then one value
+          //firstordeafult -return default if the sequesnce contain no value.
+          return await _context.Products
+          .Include(p=> p.ProductBrand )
+          .Include(p=>p.ProductType)
+          .SingleOrDefaultAsync(p =>p.Id == id);
+          
+
+        }
+
+        public async Task<IReadOnlyList<ProductBrand>> GetProductBrandsAsync()
+        {
+            return await _context.ProductBrands.ToListAsync();
+        }
+
+
+        public async Task<IReadOnlyList<ProductType>> GetProductTypesAsync()
+        {
+            return await _context.ProductType.ToListAsync();
         }
     }
 }
